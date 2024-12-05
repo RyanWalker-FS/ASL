@@ -5,7 +5,7 @@ const {
   pager,
 } = require("@jworkman-fs/asl/src/Model/index.js");
 
-let contacts = ContactModel.getAll();
+let contacts = ContactModel;
 
 const getContacts = async (req, res) => {
   let results = [...contacts];
