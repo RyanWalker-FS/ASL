@@ -1,20 +1,15 @@
 const express = require("express");
-const bodyparser = require("body-parser");
-const morgan = require("morgan");
-const cors = require("cors");
-const contactsRoutes = require("./routes/contacts");
-const { contacts } = require("@jworkman-fs/asl");
-
 const app = express();
+const port = 8080;
 
-// Middleware
-app.use(bodyparser.json());
-app.use(morgan("dev"));
-app.use(cors());
+const contactRoutes = require("./routes/contacts");
+const contactMethodRoutes = require("./routes/contactMethods");
 
-// Routes
-app.use("/v1/contacts", contactsRoutes);
+app.use("/v1/contacts", contactRoutes);
+app.use("/v1/contacts", contactMethodRoutes);
 
-const PORT = 8080 || process.env.PORT;
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
 
-app.listen(PORT, () => console.log("Server running on ${PORT}"));
+module.exports = app;

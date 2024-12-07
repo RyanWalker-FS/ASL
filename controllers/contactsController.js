@@ -1,134 +1,101 @@
 const {
   ContactModel,
-  filterContacts,
+  Pager,
   sortContacts,
-  pager,
-} = require("@jworkman-fs/asl/src/Model/index.js");
+  filterContacts,
+} = require("@jworkman-fs/asl");
 
-let contacts = ContactModel;
+const contactController = {
+  getAllContacts: async (req, res) => {
+    try {
+      const filterBy = req.query.filterBy;
+      const filterValue = req.query.filterValue;
+      const sortBy = req.query.sortBy;
+      const sortOrder = req.query.sortOrder;
+      const page = req.query.page;
+      const limit = req.query.limit;
 
-const getContacts = async (req, res) => {
-  try {
-    let results = [...contacts];
-    //filtering
-    const filterBy = req.get("X-Filter-By");
-    const filterValue = req.get("X-Filter-Value");
-    const filterOperator = req.get("X-Filter-Operator");
-    if (filterBy && filterValue && filterOperator) {
-      results = filterContacts(results, filterBy, filterValue, filterOperator);
-    }
+      let results = ContactModel.getContacts();
 
-    //sorting
-    const sort = req.query.sort;
-    const direction = req.query.direction;
+      // Filtering
+      if (filterBy && filterValue) {
+        results = filterContacts(results, filterBy, filterValue);
+      }
 
-    if (sort && direction) {
-      results = sortContacts(results, sort, direction);
-    }
+      // Sorting
+      if (sortBy && sortOrder) {
+        results = sortContacts(results, sortBy, sortOrder);
+      }
 
-    //pagination
-    const page = req.query.page;
-    const limit = req.query.limit;
+      // Pagination
+      if (page && limit) {
+        const pager = new Pager(results, page, limit);
+        results = pager.results();
+        res.set("X-Page-Total", pager.total());
+        res.set("X-Page-Next", pager.next());
+        res.set("X-Page-Prev", pager.prev());
+      }
 
-    if (page && limit) {
-      const pager = new Pager(results, page, limit);
-      results = pager.results();
-      res.set("X-Page-Total", pager.total());
-      res.set("X-Page-Next", pager.next());
-      res.set("X-Page-Prev", pager.prev());
+      res.status(200).json(results);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
+  },
 
-    res.status(200).json(results);
-  } catch (error) {
-    console.error(error);
-    switch (error.name) {
-      case "InvalidContactError":
-        return res.status(400).json({ message: error.message });
-      case "ContactNotFoundError":
-        return res.status(404).json({ message: error.message });
-      case "PagerOutOfRangeError":
-        return res.status(400).json({ message: error.message });
-      case "InvalidEnumError":
-        return res.status(400).json({ message: error.message });
-      case "PagerLimitExceededError":
-        return res.status(400).json({ message: error.message });
-      default:
-        return res.status(500).json(error);
+  getContactById: async (req, res) => {
+    try {
+      const id = req.params.id;
+      const contact = ContactModel.getContactById(id);
+      if (!contact) {
+        res.status(404).json({ message: "Contact not found" });
+      } else {
+        res.status(200).json(contact);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
-  }
-};
-// fetch a contact by id
-const getContactById = async (req, res) => {
-  try {
-    const contact = contacts.find((c) => c.id === req.params.id);
-    if (!contact) {
-      throw new ContactModel.ContactNotFoundError();
-    }
-    res.status(200).json(contact);
-  } catch (error) {
-    console.error(error);
-    switch (error.name) {
-      case "ContactNotFoundError":
-        return res.status(404).json({ message: error.message });
-      default:
-        return res.status(500).json(error);
-    }
-  }
-};
+  },
 
-//create a new contact
-const createContact = async (req, res) => {
-  try {
-    const contact = new ContactModel(req.body);
-    contacts.push(contact);
-    res.status(201).json(contact);
-  } catch (error) {
-    console.error(error);
-    switch (error.name) {
-      case "InvalidContactError":
-        return res.status(400).json({ message: error.message });
-      case "DuplicateContactResourceError":
-        return res.status(409).json({ message: error.message });
-      default:
-        return res.status(500).json(error);
+  createContact: async (req, res) => {
+    try {
+      const contact = new ContactModel(req.body);
+      ContactModel.createContact(contact);
+      res.status(201).json(contact);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
-  }
-};
-//update an existing contact
-const updateContact = async (req, res) => {
-  try {
-    const contact = contacts.find((c) => c.id === req.params.id);
-    if (!contact) {
-      throw new ContactModel.ContactNotFoundError();
+  },
+
+  updateContact: async (req, res) => {
+    try {
+      const id = req.params.id;
+      const contact = ContactModel.getContactById(id);
+      if (!contact) {
+        res.status(404).json({ message: "Contact not found" });
+      } else {
+        Object.assign(contact, req.body);
+        ContactModel.updateContact(contact);
+        res.status(200).json(contact);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
-    Object.assign(contact, req.body);
-    res.status(200).json(contact);
-  } catch (error) {
-    console.error(error);
-    switch (error.name) {
-      case "ContactNotFoundError":
-        return res.status(404).json({ message: error.message });
-      case "InvalidContactError":
-        return res.status(400).json({ message: error.message });
-      default:
-        return res.status(500).json(error);
+  },
+
+  deleteContact: async (req, res) => {
+    try {
+      const id = req.params.id;
+      ContactModel.deleteContact(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
-  }
-};
-//delete a contact
-const deleteContact = async (req, res) => {
-  const contactIndex = contacts.findIndex((c) => c.id === req.params.id);
-  if (contactIndex === -1) {
-    return res.status(404).json({ error: "Contact not found" });
-  }
-  contacts.splice(contactIndex, 1);
-  res.status(204).send();
+  },
 };
 
-module.exports = {
-  getContacts,
-  getContactById,
-  createContact,
-  updateContact,
-  deleteContact,
-};
+module.exports = contactController;
