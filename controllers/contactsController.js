@@ -8,45 +8,112 @@ const {
 let contacts = ContactModel;
 
 const getContacts = async (req, res) => {
-  let results = [...contacts];
-  //filtering
-  if (req.query.filter) {
-    result = filterContacts(results, req.query.filter);
+  try {
+    let results = [...contacts];
+    //filtering
+    const filterBy = req.get("X-Filter-By");
+    const filterValue = req.get("X-Filter-Value");
+    const filterOperator = req.get("X-Filter-Operator");
+    if (filterBy && filterValue && filterOperator) {
+      results = filterContacts(results, filterBy, filterValue, filterOperator);
+    }
+
+    //sorting
+    const sort = req.query.sort;
+    const direction = req.query.direction;
+
+    if (sort && direction) {
+      results = sortContacts(results, sort, direction);
+    }
+
+    //pagination
+    const page = req.query.page;
+    const limit = req.query.limit;
+
+    if (page && limit) {
+      const pager = new Pager(results, page, limit);
+      results = pager.results();
+      res.set("X-Page-Total", pager.total());
+      res.set("X-Page-Next", pager.next());
+      res.set("X-Page-Prev", pager.prev());
+    }
+
+    res.status(200).json(results);
+  } catch (error) {
+    console.error(error);
+    switch (error.name) {
+      case "InvalidContactError":
+        return res.status(400).json({ message: error.message });
+      case "ContactNotFoundError":
+        return res.status(404).json({ message: error.message });
+      case "PagerOutOfRangeError":
+        return res.status(400).json({ message: error.message });
+      case "InvalidEnumError":
+        return res.status(400).json({ message: error.message });
+      case "PagerLimitExceededError":
+        return res.status(400).json({ message: error.message });
+      default:
+        return res.status(500).json(error);
+    }
   }
-
-  //sorting
-  if (req.query.sort) {
-    results = sortContacts(results, req.query.sort);
-  }
-
-  //pagination
-  const pager = new Pager(req.query.page, req.query.limit);
-  result = pager.paginate(results);
-
-  res.status(200).json(result);
 };
 // fetch a contact by id
 const getContactById = async (req, res) => {
-  const contact = contacts.find((c) => c.id === req.params.id);
-  if (!contact) {
-    return res.status(404).json({ error: "Contact not found" });
+  try {
+    const contact = contacts.find((c) => c.id === req.params.id);
+    if (!contact) {
+      throw new ContactModel.ContactNotFoundError();
+    }
+    res.status(200).json(contact);
+  } catch (error) {
+    console.error(error);
+    switch (error.name) {
+      case "ContactNotFoundError":
+        return res.status(404).json({ message: error.message });
+      default:
+        return res.status(500).json(error);
+    }
   }
-  res.status(200).json(contact);
 };
+
 //create a new contact
 const createContact = async (req, res) => {
-  const contact = new ContactModel(req.body);
-  contacts.push(contact);
-  res.status(201).json(contact);
+  try {
+    const contact = new ContactModel(req.body);
+    contacts.push(contact);
+    res.status(201).json(contact);
+  } catch (error) {
+    console.error(error);
+    switch (error.name) {
+      case "InvalidContactError":
+        return res.status(400).json({ message: error.message });
+      case "DuplicateContactResourceError":
+        return res.status(409).json({ message: error.message });
+      default:
+        return res.status(500).json(error);
+    }
+  }
 };
 //update an existing contact
 const updateContact = async (req, res) => {
-  const contact = contacts.find((c) => c.id === req.params.id);
-  if (!contact == -1) {
-    return res.status(404).json({ error: "Contact not found" });
+  try {
+    const contact = contacts.find((c) => c.id === req.params.id);
+    if (!contact) {
+      throw new ContactModel.ContactNotFoundError();
+    }
+    Object.assign(contact, req.body);
+    res.status(200).json(contact);
+  } catch (error) {
+    console.error(error);
+    switch (error.name) {
+      case "ContactNotFoundError":
+        return res.status(404).json({ message: error.message });
+      case "InvalidContactError":
+        return res.status(400).json({ message: error.message });
+      default:
+        return res.status(500).json(error);
+    }
   }
-  contact[contactIndex] = { ...contacts[contactIndex], ...req.body };
-  res.status(200).json(contacts[contactIndex]);
 };
 //delete a contact
 const deleteContact = async (req, res) => {
