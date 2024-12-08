@@ -1,15 +1,11 @@
 const express = require("express");
 const app = express();
-const port = 8080;
+const router = require("./routes/index");
 
-const contactRoutes = require("./routes/contacts");
-const contactMethodRoutes = require("./routes/contactMethods");
+app.use(express.json());
 
-app.use("/v1/contacts", contactRoutes);
-app.use("/v1/contacts", contactMethodRoutes);
-
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
-
-module.exports = app;
+app.use(router);
