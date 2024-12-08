@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express();
-const contactsRouter = require("./contacts");
+const contactsRouter = require("./contact");
 
 router.get("/v1", (req, res) => {
   res.status(200).json({
