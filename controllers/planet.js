@@ -1,69 +1,42 @@
-const express = require("express");
-const router = express.Router();
-const Planet = require("../models/Planet");
+const { Planet, Star } = require("../models/index");
 
 // Show all resources
 const index = async (req, res) => {
-  try {
-    const planets = await Planet.findAll();
-    res.status(200).json(planets);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching planets" });
-  }
+  const planets = await Planet.findAll({ include: [Star] });
+  // Respond with an array and 2xx status code
+  res.status(200).json(planets);
 };
 
 // Show resource
 const show = async (req, res) => {
-  try {
-    const planet = await Planet.findByPk(req.params.id);
-    if (!planet) {
-      res.status(404).json({ message: "Planet not found" });
-    } else {
-      res.status(200).json(planet);
-    }
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching planet" });
-  }
+  const planet = await Planet.findByPk(req.params.id, { include: [Star] });
+  // Respond with a single object and 2xx code
+  res.status(200).json(planet);
 };
 
 // Create a new resource
 const create = async (req, res) => {
-  try {
-    const planet = await Planet.create(req.body);
-    res.redirect(`/planets/${planet.id}`, 201);
-  } catch (err) {
-    res.status(500).json({ message: "Error creating planet" });
-  }
+  const planet = await Planet.create(req.body);
+
+  res.status(201).json(planet);
+  // Issue a redirect with a success 2xx code
+  //res.redirect(`/planets`, 201)
 };
 
 // Update an existing resource
 const update = async (req, res) => {
-  try {
-    const planet = await Planet.findByPk(req.params.id);
-    if (!planet) {
-      res.status(404).json({ message: "Planet not found" });
-    } else {
-      await planet.update(req.body);
-      res.status(200).json(planet);
-    }
-  } catch (err) {
-    res.status(500).json({ message: "Error updating planet" });
-  }
+  const planet = await Planet.update(req.body, {
+    where: { id: req.params.id },
+  });
+  // Respond with a single resource and 2xx code
+  res.status(200).json(planet);
 };
 
 // Remove a single resource
 const remove = async (req, res) => {
-  try {
-    const planet = await Planet.findByPk(req.params.id);
-    if (!planet) {
-      res.status(404).json({ message: "Planet not found" });
-    } else {
-      await planet.destroy();
-      res.status(204).json(true);
-    }
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting planet" });
-  }
+  Planet.destroy({ where: { id: req.params.id } });
+  // Respond with a 2xx status code and bool
+  res.status(204).json(true);
 };
 
 // Export all controller actions
