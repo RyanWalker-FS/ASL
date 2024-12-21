@@ -11,7 +11,9 @@ const routers = require("./routers/index.js");
 
 const bodyParser = require("body-parser");
 app.use(express.static("public"));
-
+const methodOverride = require("method-override");
+app.use(express.json());
+app.use(methodOverride("_method"));
 app.use(bodyParser.urlencoded({ extended: false }));
 
 const fileUpload = require("express-fileupload");
