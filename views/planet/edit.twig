@@ -1,0 +1,15 @@
+{% extends 'layouts/_default.twig' %}
+
+<h1> Edit {{planet.name}} </h1>
+
+
+{% block pageName %} Edit {{planet.name}} {% endblock %}
+
+{% block main_content%}
+    {% include 'planet/_form.twig' with {"planet": planet} %}
+{% endblock %}
+
+<p>
+    <a href= "/planets/{{planet.id}}/delete" > Delete Planet </a> <br/>
+    <a href= "/planets/" > View all Planets </a> <br/>
+</p>

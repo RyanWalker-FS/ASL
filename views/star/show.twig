@@ -1,0 +1,14 @@
+<link rel="stylesheet" type="text/css" href="/stylesheets/app.css"/>
+<h1>{{star.name}}</h1>
+
+<p>
+    <strong> Name: </strong> {{ star.name }} <br/>
+    <strong> Size: </strong> {{ star.size }} <br/>
+    <strong> Description: </strong> {{ star.description }} <br/>
+</p>
+
+<p>
+    <a href= "/stars/{{star.id}}/edit" > Edit star </a> <br/>
+    <a href= "/stars/{{star.id}}/delete" > Delete star </a> <br/>
+    <a href= "/stars/" > View all stars </a> <br/>
+</p>

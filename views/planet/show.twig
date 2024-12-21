@@ -1,0 +1,14 @@
+<link rel="stylesheet" type="text/css" href="/stylesheets/app.css"/>
+<h1>{{planet.name}}</h1>
+
+<p>
+    <strong> Name: </strong> {{ planet.name }} <br/>
+    <strong> Size: </strong> {{ planet.size }} <br/>
+    <strong> Description: </strong> {{ planet.description }} <br/>
+</p>
+
+<p>
+    <a href= "/planets/{{planet.id}}/edit" > Edit Planet </a> <br/>
+    <a href= "/planets/{{planet.id}}/delete" > Delete Planet </a> <br/>
+    <a href= "/planets/" > View all Planets </a> <br/>
+</p>

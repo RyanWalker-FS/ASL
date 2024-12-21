@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block pageName %}{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/app.css"/>
+</head>
+<main id="main">
+<body>
+{% include 'partials/header.twig' %}
+{% block main_content %}
+{% endblock %}
+{% include 'partials/footer.twig' %}
+</body>
+</main>
+</html>

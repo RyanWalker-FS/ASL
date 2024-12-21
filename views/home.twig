@@ -1,0 +1,11 @@
+{% extends 'layouts/_default.twig' %}
+<link rel="stylesheet" type="text/css" href="/stylesheets/app.css"/>
+
+{% block main_content %}
+<h1>Home {{name}}</h1> 
+
+<a href="/planets">Planets</a> |
+<a href="/stars">Stars</a> |
+<a href="/galaxies">Galaxies</a> |
+<a href="/images/new">Upload New Image</a>
+{% endblock %}

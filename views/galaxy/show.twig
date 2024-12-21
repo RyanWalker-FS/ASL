@@ -1,0 +1,14 @@
+<link rel="stylesheet" type="text/css" href="/stylesheets/app.css"/>
+<h1>{{galaxy.name}}</h1>
+
+<p>
+    <strong> Name: </strong> {{ galaxy.name }} <br/>
+    <strong> Size: </strong> {{ galaxy.size }} <br/>
+    <strong> Description: </strong> {{ galaxy.description }} <br/>
+</p>
+
+<p>
+    <a href= "/galaxies/{{galaxy.id}}/edit" > Edit galaxy </a> <br/>
+    <a href= "/galaxies/{{galaxy.id}}/delete" > Delete galaxy </a> <br/>
+    <a href= "/galaxies/" > View all galaxies </a> <br/>
+</p>

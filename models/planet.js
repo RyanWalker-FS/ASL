@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Planet extends Model {
     /**
@@ -11,23 +9,27 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      models.Planet.belongsToMany(models.Star, { through: 'starplanet' })
+      models.Planet.belongsToMany(models.Star, { through: "starplanet" });
     }
   }
-  Planet.init({
-    name: DataTypes.STRING,
-    size: DataTypes.INTEGER,
-    description: DataTypes.TEXT,
-    StarId:DataTypes.INTEGER,
-    StarId: {type: DataTypes.INTEGER,
-      references:{
-        model:"Star",
-        key:"id"
-      }
+  Planet.init(
+    {
+      name: DataTypes.STRING,
+      size: DataTypes.INTEGER,
+      description: DataTypes.TEXT,
+      StarId: DataTypes.INTEGER,
+      StarId: {
+        type: DataTypes.INTEGER,
+        references: {
+          model: "Star",
+          key: "id",
+        },
+      },
+    },
+    {
+      sequelize,
+      modelName: "Planet",
     }
-  }, {
-    sequelize,
-    modelName: 'Planet',
-  });
+  );
   return Planet;
 };

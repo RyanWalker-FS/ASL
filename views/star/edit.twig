@@ -1,0 +1,12 @@
+<h1> Edit {{star.name}} </h1>
+
+{% block pageName %} Edit {{star.name}} {% endblock %}
+
+{% block main_content%}
+    {% include 'star/_form.twig' with {"star": star} %}
+{% endblock %}
+
+<p>
+    <a href= "/stars/{{star.id}}/delete" > Delete star </a> <br/>
+    <a href= "/stars/" > View all stars </a> <br/>
+</p>
